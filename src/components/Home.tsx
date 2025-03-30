@@ -25,7 +25,7 @@ const HomePage = () => {
       toast.error("Please select at least one ingredient!");
       return;
     }
-    addToCart({ id: Date.now(), ingredients: selectedIngredients });
+    addToCart({ id: Date.now(), ingredients: selectedIngredients, quantity: 1 });
     toast.success("Pizza added to cart!");
     setSelectedIngredients([]); 
     navigate("/cart");
@@ -83,7 +83,9 @@ const HomePage = () => {
                   style={{ width: "100px", height: "100px", objectFit: "cover" }}
                 />
                 <Title level={4}>{ingredient.name}</Title>
-                <Text style={{ color: "#555" }}>${ingredient.price.toFixed(2)}</Text>
+                <Text style={{ color: "#555" }}>
+                  ${ingredient.price ? ingredient.price.toFixed(2) : "0.00"}
+                </Text>
               </Space>
             </Card>
           </Col>
