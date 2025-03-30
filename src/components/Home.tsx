@@ -34,7 +34,7 @@ const HomePage = () => {
   return (
     <div
       style={{
-        minHeight: "100vh",
+        minHeight: "100%",
         background: "url('/images/pizza-background.jpg') center/cover no-repeat",
         padding: "2rem",
       }}

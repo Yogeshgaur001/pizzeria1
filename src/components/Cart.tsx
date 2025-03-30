@@ -38,7 +38,7 @@ const CartPage = () => {
   return (
     <div
       style={{
-        minHeight: "100vh",
+        minHeight: "100%",
         background: "url('/images/cart-background.jpg') center/cover no-repeat",
         padding: "2rem",
       }}

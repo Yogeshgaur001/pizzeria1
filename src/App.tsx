@@ -15,15 +15,17 @@ const AppContent = () => {
 
   return (
     <>
-      {!hideNavbarRoutes.includes(location.pathname) && <Navbar />}
+     {!hideNavbarRoutes.includes(location.pathname) && <Navbar />}
       <Toaster position="top-right" />
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/cart" element={<CartPage />} />
-        <Route path="/orders" element={<OrdersPage />} />
-        <Route path="/auth" element={<AuthPage />} />
-        <Route path="*" element={<ErrorPage />} />
-      </Routes>
+      <div style={{ paddingTop: hideNavbarRoutes.includes(location.pathname) ? "0" : "64px" }}>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/cart" element={<CartPage />} />
+          <Route path="/orders" element={<OrdersPage />} />
+          <Route path="/auth" element={<AuthPage />} />
+          <Route path="*" element={<ErrorPage />} />
+        </Routes>
+      </div>
     </>
   );
 };
