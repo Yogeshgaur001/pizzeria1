@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useAuth } from "./context/AuthContext";
+import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { Button, Input, Typography, Card, Space } from "antd";
 import { UserOutlined, LoginOutlined } from "@ant-design/icons";

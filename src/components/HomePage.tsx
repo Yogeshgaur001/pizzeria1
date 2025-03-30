@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom"; // Import useNavigate
-import { useCart } from "./context/CartContext";
+import { useCart } from "../context/CartContext";
 import { ingredients } from "../data/ingredients";
 import { Button, Card, Typography, Row, Col, Space } from "antd";
 import toast from "react-hot-toast";

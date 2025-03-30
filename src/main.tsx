@@ -1,12 +1,10 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
-import { CartProvider } from "./components/context/CartContext.tsx";
+import "antd/dist/reset.css";
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-     <CartProvider>
-      <App />
-    </CartProvider>
+    <App />
   </StrictMode>,
 )

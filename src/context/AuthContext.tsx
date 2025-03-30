@@ -20,12 +20,27 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [orders, setOrders] = useState<Order[]>([]);
+
+  // Add initial orders for demonstration
+  const [orders, setOrders] = useState<Order[]>([
+    {
+      pizzas: [
+        { ingredients: ["Cheese", "Pepperoni"] },
+        { ingredients: ["Mushrooms", "Olives"] },
+      ],
+    },
+    {
+      pizzas: [
+        { ingredients: ["Cheese", "Tomatoes"] },
+        { ingredients: ["Basil", "Mozzarella"] },
+      ],
+    },
+  ]);
 
   const login = (name: string) => setUser({ name });
   const logout = () => {
     setUser(null);
-    setOrders([]);
+    setOrders([]); // Clear orders on logout
   };
 
   const addOrder = (order: Order) => setOrders((prev) => [...prev, order]);

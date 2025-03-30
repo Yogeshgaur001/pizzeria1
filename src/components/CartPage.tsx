@@ -1,6 +1,6 @@
-import { useCart } from "./context/CartContext";
+import { useCart } from "../context/CartContext";
 import { Button, Card, Typography, Row, Col, Divider, InputNumber } from "antd";
-import { useAuth } from "./context/AuthContext";
+import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 

@@ -1,8 +1,8 @@
 import React from "react";
 import { Menu, Layout, Badge } from "antd";
-import { ShoppingCartOutlined, HomeOutlined, UserOutlined } from "@ant-design/icons";
+import { ShoppingCartOutlined, HomeOutlined, UserOutlined, FileTextOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
-import { useCart } from "./context/CartContext";
+import { useCart } from "../context/CartContext";
 
 const { Header } = Layout;
 
@@ -49,6 +49,14 @@ const Navbar = () => {
           style={{ color: "#fff" }}
         >
           Cart
+        </Menu.Item>
+        <Menu.Item
+          key="orders"
+          icon={<FileTextOutlined />}
+          onClick={() => navigate("/orders")}
+          style={{ color: "#fff" }}
+        >
+          Orders
         </Menu.Item>
         <Menu.Item
           key="auth"

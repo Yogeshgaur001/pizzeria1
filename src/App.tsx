@@ -1,13 +1,13 @@
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
-import HomePage from "./components/Home";
-import CartPage from "./components/Cart";
-import OrdersPage from "./components/Orders";
-import AuthPage from "./components/Auth";
-import Navbar from "./components/Navbar";
-import ErrorPage from "./components/ErrorPage";
+import HomePage from "./Components/HomePage";
+import CartPage from "./Components/CartPage";
+import OrdersPage from "./Components/OrdersPage";
+import AuthPage from "./Components/AuthPage";
+import Navbar from "./Components/Navbar";
+import ErrorPage from "./Components/ErrorPage";
 import { Toaster } from "react-hot-toast";
-import { CartProvider } from "./components/context/CartContext";
-import { AuthProvider } from "./components/context/AuthContext";
+import { CartProvider } from "./context/CartContext";
+import { AuthProvider } from "./context/AuthContext";
 
 const AppContent = () => {
   const location = useLocation();
@@ -15,7 +15,7 @@ const AppContent = () => {
 
   return (
     <>
-     {!hideNavbarRoutes.includes(location.pathname) && <Navbar />}
+      {!hideNavbarRoutes.includes(location.pathname) && <Navbar />}
       <Toaster position="top-right" />
       <div style={{ paddingTop: hideNavbarRoutes.includes(location.pathname) ? "0" : "64px" }}>
         <Routes>
