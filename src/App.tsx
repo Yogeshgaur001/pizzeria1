@@ -8,10 +8,11 @@ import ErrorPage from "./Components/ErrorPage";
 import { Toaster } from "react-hot-toast";
 import { CartProvider } from "./context/CartContext";
 import { AuthProvider } from "./context/AuthContext";
+import LoginPage from "./Components/LoginPage";
 
 const AppContent = () => {
   const location = useLocation();
-  const hideNavbarRoutes = ["/auth"]; // Add routes where Navbar should be hidden
+  const hideNavbarRoutes = ["/register", "/login"]; // Add routes where Navbar should be hidden
 
   return (
     <>
@@ -22,7 +23,8 @@ const AppContent = () => {
           <Route path="/" element={<HomePage />} />
           <Route path="/cart" element={<CartPage />} />
           <Route path="/orders" element={<OrdersPage />} />
-          <Route path="/auth" element={<AuthPage />} />
+          <Route path="/register" element={<AuthPage />} />
+          <Route path="/login" element={<LoginPage />} />
           <Route path="*" element={<ErrorPage />} />
         </Routes>
       </div>
