@@ -3,12 +3,19 @@ import { Menu, Layout, Badge } from "antd";
 import { ShoppingCartOutlined, HomeOutlined, UserOutlined, FileTextOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext";
 
 const { Header } = Layout;
 
 const Navbar = () => {
   const navigate = useNavigate();
   const { cart } = useCart();
+  const { logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
 
   return (
     <Header style={{ backgroundColor: "#fa541c", position: "fixed", zIndex: 1, width: "100%" }}>
@@ -61,10 +68,10 @@ const Navbar = () => {
         <Menu.Item
           key="auth"
           icon={<UserOutlined />}
-          onClick={() => navigate("/auth")}
+          onClick={() => handleLogout()}
           style={{ color: "#fff" }}
         >
-          Login
+          Logout
         </Menu.Item>
       </Menu>
     </Header>
