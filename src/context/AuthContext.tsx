@@ -1,7 +1,10 @@
 import { createContext, useContext, useState, ReactNode } from "react";
+import toast from "react-hot-toast";
 
 interface User {
-  name: string;
+  id: number; // Optional ID for the user
+  email: string;
+  password: string; // Store password temporarily (not recommended for production)
 }
 
 interface Order {
@@ -10,7 +13,7 @@ interface Order {
 
 interface AuthContextType {
   user: User | null;
-  login: (name: string) => void;
+  login: (id: string, email: string, password: string) => void;
   logout: () => void;
   orders: Order[];
   addOrder: (order: Order) => void;
@@ -37,10 +40,29 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     },
   ]);
 
-  const login = (name: string) => setUser({ name });
-  const logout = () => {
-    setUser(null);
-    setOrders([]); // Clear orders on logout
+  const login = (id: string, email: string, password: string) => setUser({ id, email, password });
+  const logout = async () => {
+    try {
+      // Call the logout API
+      await fetch("http://localhost:3000/auth/logout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+  
+      // Clear user and orders state
+      setUser(null);
+      setOrders([]);
+  
+      // Clear authToken from localStorage
+      localStorage.removeItem("authToken");
+  
+      toast.success("Logged out successfully!");
+    } catch (error) {
+      console.error("Error during logout:", error);
+      toast.error("Failed to log out. Please try again.");
+    }
   };
 
   const addOrder = (order: Order) => setOrders((prev) => [...prev, order]);
