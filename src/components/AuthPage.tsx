@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Button, Input, Typography, Card, Space } from "antd";
-import { UserOutlined, LoginOutlined } from "@ant-design/icons";
+import { UserOutlined, LockOutlined, LoginOutlined } from "@ant-design/icons";
 import toast from "react-hot-toast";
 
 const { Title, Text } = Typography;
@@ -10,16 +10,36 @@ const { Title, Text } = Typography;
 const AuthPage = () => {
   const { login } = useAuth();
   const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  const handleLogin = () => {
-    if (username.trim() === "") {
-      toast.error("Username cannot be empty.");
+  const handleRegister = async () => {
+    if (username.trim() === "" || password.trim() === "") {
+      toast.error("Email and password cannot be empty.");
       return;
     }
-    login(username);
-    toast.success("Logged in successfully!");
-    navigate("/");
+
+    try {
+      const response = await fetch("http://localhost:3000/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: username, password }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Registration failed.");
+      }
+
+      toast.success("Registered successfully!");
+      login(username, password); // Assuming login after registration
+      navigate("/");
+    } catch (error: any) {
+      console.log(error);
+      toast.error(error.message || "An error occurred during registration.");
+    }
   };
 
   return (
@@ -67,23 +87,33 @@ const AuthPage = () => {
               Welcome to Pizzeria
             </Title>
             <Text type="secondary" style={{ color: "#555" }}>
-              Please enter your name to start ordering delicious pizzas!
+              Please enter your details to start ordering delicious pizzas!
             </Text>
             <Input
               size="large"
-              placeholder="Enter your name"
+              placeholder="Enter your email"
               prefix={<UserOutlined />}
               value={username}
               onChange={(e) => setUsername(e.target.value)}
             />
+            <Input.Password
+              size="large"
+              placeholder="Enter your password"
+              prefix={<LockOutlined />}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
             <Button
               type="primary"
               icon={<LoginOutlined />}
-              onClick={handleLogin}
+              onClick={handleRegister}
               block
             >
-              Login
+              Register
             </Button>
+            <Text type="secondary" style={{ marginTop: "10px" }}>
+              Already have an account? <Link to="/login">Login here</Link>
+            </Text>
           </Space>
         </Card>
       </div>
