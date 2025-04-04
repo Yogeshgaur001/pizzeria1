@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  pizzeria-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    expose:
+      - "5173"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    stdin_open: true
+    tty: true
