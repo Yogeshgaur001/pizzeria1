@@ -3,22 +3,123 @@ import { Button, Card, Typography, Row, Col, Divider, InputNumber } from "antd";
 import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import { useEffect, useRef } from "react";
+import { jwtDecode } from "jwt-decode";
 
 const { Title, Text } = Typography;
 
 const CartPage = () => {
-  const { cart, updateCart, clearCart } = useCart(); // Add updateCart function to modify cart items
-  const { user } = useAuth();
+  const { cart, updateCart, clearCart } = useCart();
   const navigate = useNavigate();
+  const hasFetchedCart = useRef(false);
 
-  const handleCheckout = () => {
-    if (!user) {
+  useEffect(() => {
+  
+    const fetchCartItems = async () => {
+      try {
+        // Prevent fetching the cart multiple times
+        if (hasFetchedCart.current) return;
+  
+        // Retrieve the authToken from localStorage
+        const token = localStorage.getItem("authToken");
+        if (!token) {
+          console.error("No auth token found");
+          toast.error("You need to log in to view your cart.");
+          navigate("/login");
+          return;
+        }
+  
+        // Decode the token to extract the user ID
+        const decodedToken: { id: string; email: string } = jwtDecode(token);
+        const userId = decodedToken.id;
+        console.log("User ID from token:", userId); // Debug log
+  
+        // Fetch cart items using the user ID
+        const response = await fetch(`http://localhost:3000/cart?userId=${userId}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+  
+        if (!response.ok) {
+          throw new Error("Failed to fetch cart items");
+        }
+  
+        const data = await response.json();
+        console.log("Cart items fetched:", data); // Debug log
+  
+        // Map the API response to the expected cart structure
+        const formattedCart = data.map((item: any) => ({
+          id: item.id,
+          quantity: 1, // Default quantity to 1 (can be updated later)
+          ingredients: Object.keys(item.pizzaDetails), // Extract ingredient names
+        }));
+  
+        console.log("Formatted cart:", formattedCart); // Debug log
+        updateCart(formattedCart); // Update the cart context with the formatted data
+  
+        hasFetchedCart.current = true; // Mark as fetched
+      } catch (error) {
+        console.error("Error fetching cart items:", error);
+        toast.error("Failed to fetch cart items.");
+      }
+    };
+  
+    fetchCartItems();
+  }, [updateCart, navigate]);
+
+  const handleCheckout = async () => {
+    const token = localStorage.getItem("authToken");
+    if (!token) {
       toast.error("Please login to place an order.");
       navigate("/auth");
       return;
     }
-    toast.success("Order placed successfully!");
-    clearCart();
+  
+    try {
+      // Decode the token to extract the user ID
+      const decodedToken: { id: string; email: string } = jwtDecode(token);
+      const userId = decodedToken.id;
+  
+      // Prepare the order payload
+      const orderDetails = {
+        pizzas: cart.map((pizza) => ({
+          ingredients: pizza.ingredients.map((ingredient) => ({
+            name: ingredient,
+            price: "2.50", // Assuming a fixed price for simplicity
+          })),
+          quantity: pizza.quantity,
+        })),
+        totalPrice: calculateTotal().toFixed(2),
+        orderDate: new Date().toISOString().split("T")[0], // Format as YYYY-MM-DD
+      };
+  
+      const payload = {
+        userId,
+        orderDetails,
+      };
+  
+      // Send the POST request to create the order
+      const response = await fetch("http://localhost:3000/orders", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+  
+      if (!response.ok) {
+        throw new Error("Failed to create order");
+      }
+  
+      toast.success("Order placed successfully!");
+      clearCart();
+      navigate("/orders"); // Redirect to orders page after successful checkout
+    } catch (error) {
+      console.error("Error creating order:", error);
+      toast.error("Failed to place the order. Please try again.");
+    }
   };
 
   const calculateTotal = () => {
