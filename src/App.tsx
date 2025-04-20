@@ -1,14 +1,14 @@
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
-import HomePage from "./Components/HomePage";
-import CartPage from "./Components/CartPage";
-import OrdersPage from "./Components/OrdersPage";
-import AuthPage from "./Components/AuthPage";
-import Navbar from "./Components/Navbar";
-import ErrorPage from "./Components/ErrorPage";
+import HomePage from "./components/HomePage";
+import CartPage from "./components/CartPage";
+import OrdersPage from "./components/OrdersPage";
+import AuthPage from "./components/AuthPage";
+import Navbar from "./components/Navbar";
+import ErrorPage from "./components/ErrorPage";
 import { Toaster } from "react-hot-toast";
 import { CartProvider } from "./context/CartContext";
 import { AuthProvider } from "./context/AuthContext";
-import LoginPage from "./Components/LoginPage";
+import LoginPage from "./components/LoginPage";
 
 const AppContent = () => {
   const location = useLocation();

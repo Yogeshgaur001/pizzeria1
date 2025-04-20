@@ -22,14 +22,29 @@ const Navbar = () => {
       <div
         style={{
           float: "left",
-          color: "#fff",
-          fontSize: "1.5rem",
-          fontWeight: "bold",
+          display: "flex",
+          alignItems: "center",
           cursor: "pointer",
         }}
         onClick={() => navigate("/")}
       >
-        Pizzeria
+        <img
+          src="/Pizzeria.png"
+          alt="Pizzeria Logo"
+          className="rotating-image" // Add the rotating class
+          style={{ height: "40px", marginRight: "10px" }}
+        />
+        <span
+          style={{
+            color: "#fff",
+            fontSize: "1.8rem", // Slightly increased font size
+            fontWeight: "bold",
+            fontFamily: "'Pacifico', cursive", // Attractive font family
+            textShadow: "2px 2px 4px rgba(0, 0, 0, 0.5)", // Subtle text shadow for depth
+          }}
+        >
+          Pizzeria
+        </span>
       </div>
       <Menu
         theme="dark"

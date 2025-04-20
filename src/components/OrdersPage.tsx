@@ -1,9 +1,21 @@
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { Card, Typography, Button, List, Divider } from "antd";
+import {
+  Card,
+  Typography,
+  Button,
+  List,
+  Divider,
+  Spin,
+  Tag,
+  Descriptions,
+  Row,
+  Col,
+  Empty,
+} from "antd";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import {jwtDecode} from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 import axios from "axios";
 
 const { Title, Text } = Typography;
@@ -17,18 +29,15 @@ const OrdersPage = () => {
   useEffect(() => {
     const token = localStorage.getItem("authToken");
     if (!token) {
-      console.error("No auth token found");
-      toast.error("You need to log in to view your cart.");
+      toast.error("You need to log in to view your orders.");
       navigate("/login");
       return;
     }
 
-    // Decode the token to extract the user ID
     const decodedToken: { id: string; email: string } = jwtDecode(token);
     const userId = decodedToken.id;
     setUserId(userId);
 
-    // Fetch orders from the API
     const fetchOrders = async () => {
       try {
         const response = await axios.get(
@@ -63,56 +72,74 @@ const OrdersPage = () => {
 
   if (loading) {
     return (
-      <div style={{ textAlign: "center", marginTop: "2rem" }}>
-        <Title level={3}>Loading your orders...</Title>
+      <div style={{ textAlign: "center", marginTop: "5rem" }}>
+        <Spin tip="Loading your orders..." size="large" />
       </div>
     );
   }
 
   return (
-    <div style={{ padding: "2rem" }}>
-      <Title level={2} style={{ color: "#fa541c", marginBottom: "1rem" }}>
+    <div style={{ maxWidth: "900px", margin: "0 auto", padding: "2rem" }}>
+      <Title level={2} style={{ color: "#fa541c", marginBottom: "2rem" }}>
         Your Orders
       </Title>
+
       {orders.length === 0 ? (
-        <Text>No past orders found.</Text>
+        <Empty description="No past orders found." />
       ) : (
         <List
+          itemLayout="vertical"
+          size="large"
           dataSource={orders}
           renderItem={(order) => (
             <Card
               key={order?.id}
+              bordered={false}
               style={{
-                marginBottom: "1.5rem",
-                borderRadius: "10px",
-                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
-                padding: "1.5rem",
+                marginBottom: "2rem",
+                borderRadius: "12px",
+                boxShadow: "0 4px 18px rgba(0,0,0,0.1)",
               }}
             >
-              <Title level={4} style={{ color: "#fa541c" }}>
-                Order #{order?.id}
-              </Title>
+              <Row justify="space-between" align="middle">
+                <Col>
+                  <Title level={4} style={{ marginBottom: 0 }}>
+                    Order #{order?.id}
+                  </Title>
+                </Col>
+                <Col>
+                  <Text type="secondary">
+                    {new Date(order?.orderDetails?.orderDate).toLocaleString()}
+                  </Text>
+                </Col>
+              </Row>
+
               <Divider />
-              <Text strong>Order Date:</Text>{" "}
-              <Text>{new Date(order?.orderDetails?.orderDate).toLocaleDateString()}</Text>
-              <br />
-              <Text strong>Total Price:</Text>{" "}
-              <Text style={{ color: "#52c41a" }}>${order?.orderDetails?.totalPrice}</Text>
-              <Divider />
-              <Text strong>Pizzas:</Text>
-              <ul style={{ paddingLeft: "1.5rem", marginTop: "0.5rem" }}>
-                {order?.orderDetails?.pizzas.map((pizza, index) => (
-                  <li key={index} style={{ marginBottom: "0.5rem" }}>
-                    <Text>
-                      {pizza?.quantity}x (
-                      {pizza?.ingredients
-                        .map((ingredient) => ingredient?.name)
-                        .join(", ")}
-                      )
-                    </Text>
-                  </li>
-                ))}
-              </ul>
+
+              <Descriptions column={1} bordered size="middle">
+                <Descriptions.Item label="Total Price">
+                  <Text strong style={{ color: "#52c41a" }}>
+                    ${order?.orderDetails?.totalPrice}
+                  </Text>
+                </Descriptions.Item>
+                <Descriptions.Item label="Pizzas">
+                  {order?.orderDetails?.pizzas.map((pizza, index) => (
+                    <div
+                      key={index}
+                      style={{ marginBottom: "1rem", paddingLeft: "0.5rem" }}
+                    >
+                      <Text strong>{pizza?.quantity}x Pizza</Text>
+                      <div style={{ marginTop: "0.5rem" }}>
+                        {pizza?.ingredients.map((ingredient, i) => (
+                          <Tag color="volcano" key={i}>
+                            {ingredient?.name}
+                          </Tag>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </Descriptions.Item>
+              </Descriptions>
             </Card>
           )}
         />

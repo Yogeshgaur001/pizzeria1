@@ -1,8 +1,7 @@
 import { useCart } from "../context/CartContext";
-import { Button, Card, Typography, Row, Col, Divider, InputNumber } from "antd";
-import { useAuth } from "../context/AuthContext";
-import toast from "react-hot-toast";
+import { Button, Card, Typography, Row, Col, Divider, InputNumber, Empty } from "antd";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import { useEffect, useRef } from "react";
 import { jwtDecode } from "jwt-decode";
 
@@ -14,60 +13,60 @@ const CartPage = () => {
   const hasFetchedCart = useRef(false);
 
   useEffect(() => {
-  
     const fetchCartItems = async () => {
       try {
-        // Prevent fetching the cart multiple times
         if (hasFetchedCart.current) return;
-  
-        // Retrieve the authToken from localStorage
+
         const token = localStorage.getItem("authToken");
         if (!token) {
-          console.error("No auth token found");
           toast.error("You need to log in to view your cart.");
           navigate("/login");
           return;
         }
-  
-        // Decode the token to extract the user ID
+
         const decodedToken: { id: string; email: string } = jwtDecode(token);
         const userId = decodedToken.id;
-        console.log("User ID from token:", userId); // Debug log
-  
-        // Fetch cart items using the user ID
+
         const response = await fetch(`http://localhost:3000/cart?userId=${userId}`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
           },
         });
-  
-        if (!response.ok) {
-          throw new Error("Failed to fetch cart items");
-        }
-  
+
+        if (!response.ok) throw new Error("Failed to fetch cart items");
+
         const data = await response.json();
-        console.log("Cart items fetched:", data); // Debug log
-  
-        // Map the API response to the expected cart structure
+
         const formattedCart = data.map((item: any) => ({
           id: item.id,
-          quantity: 1, // Default quantity to 1 (can be updated later)
-          ingredients: Object.keys(item.pizzaDetails), // Extract ingredient names
+          quantity: 1,
+          ingredients: Object.keys(item.pizzaDetails),
         }));
-  
-        console.log("Formatted cart:", formattedCart); // Debug log
-        updateCart(formattedCart); // Update the cart context with the formatted data
-  
-        hasFetchedCart.current = true; // Mark as fetched
+
+        updateCart(formattedCart);
+        hasFetchedCart.current = true;
       } catch (error) {
         console.error("Error fetching cart items:", error);
         toast.error("Failed to fetch cart items.");
       }
     };
-  
+
     fetchCartItems();
   }, [updateCart, navigate]);
+
+  const calculateTotal = () =>
+    cart.reduce(
+      (total, pizza) => total + pizza.quantity * pizza.ingredients.length * 2.5,
+      0
+    );
+
+  const handleQuantityChange = (index: number, quantity: number) => {
+    if (quantity < 1) return;
+    const updatedCart = [...cart];
+    updatedCart[index].quantity = quantity;
+    updateCart(updatedCart);
+  };
 
   const handleCheckout = async () => {
     const token = localStorage.getItem("authToken");
@@ -76,117 +75,99 @@ const CartPage = () => {
       navigate("/auth");
       return;
     }
-  
+
     try {
-      // Decode the token to extract the user ID
       const decodedToken: { id: string; email: string } = jwtDecode(token);
       const userId = decodedToken.id;
-  
-      // Prepare the order payload
+
       const orderDetails = {
         pizzas: cart.map((pizza) => ({
           ingredients: pizza.ingredients.map((ingredient) => ({
             name: ingredient,
-            price: "2.50", // Assuming a fixed price for simplicity
+            price: "2.50",
           })),
           quantity: pizza.quantity,
         })),
         totalPrice: calculateTotal().toFixed(2),
-        orderDate: new Date().toISOString().split("T")[0], // Format as YYYY-MM-DD
+        orderDate: new Date().toISOString().split("T")[0],
       };
-  
-      const payload = {
-        userId,
-        orderDetails,
-      };
-  
-      // Send the POST request to create the order
+
+      const payload = { userId, orderDetails };
+
       const response = await fetch("http://localhost:3000/orders", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-  
-      if (!response.ok) {
-        throw new Error("Failed to create order");
-      }
-  
+
+      if (!response.ok) throw new Error("Failed to create order");
+
       toast.success("Order placed successfully!");
       clearCart();
-      navigate("/orders"); // Redirect to orders page after successful checkout
+      navigate("/orders");
     } catch (error) {
       console.error("Error creating order:", error);
       toast.error("Failed to place the order. Please try again.");
     }
   };
 
-  const calculateTotal = () => {
-    return cart.reduce(
-      (total, pizza) => total + pizza.quantity * pizza.ingredients.length * 2.5,
-      0
-    );
-  };
-
-  const handleQuantityChange = (index: number, quantity: number) => {
-    if (quantity < 1) return; // Prevent quantity from being less than 1
-    const updatedCart = [...cart];
-    updatedCart[index].quantity = quantity;
-    updateCart(updatedCart); // Update the cart in the context
-  };
-
   return (
     <div
       style={{
-        minHeight: "100%",
-        background: "url('/images/cart-background.jpg') center/cover no-repeat",
-        padding: "2rem",
+        minHeight: "100vh",
+        background: "linear-gradient(135deg, #fff 40%, #fff7f0 100%)",
+        padding: "3rem 1rem",
       }}
     >
       <div style={{ textAlign: "center", marginBottom: "2rem" }}>
-        <Title level={1} style={{ color: "#fa541c" }}>
+        <Title level={1} style={{ color: "#fa541c", fontWeight: "bold" }}>
           Your Cart
         </Title>
-        <Text style={{ fontSize: "1.2rem", color: "#555" }}>
-          Review your order before checkout!
+        <Text style={{ fontSize: "1.2rem", color: "#666" }}>
+          Review your custom pizzas before placing the order.
         </Text>
       </div>
 
       {cart.length === 0 ? (
-        <div style={{ textAlign: "center", marginTop: "2rem" }}>
-          <Text style={{ fontSize: "1.5rem", color: "#555" }}>
-            Your cart is empty. Start customizing your pizza!
-          </Text>
+        <div style={{ textAlign: "center", marginTop: "4rem" }}>
+          <Empty
+            description={<Text style={{ fontSize: "1.2rem" }}>Your cart is empty</Text>}
+          />
           <Button
             type="primary"
             size="large"
             onClick={() => navigate("/")}
             style={{
-              marginTop: "1rem",
+              marginTop: "1.5rem",
               backgroundColor: "#fa541c",
               borderColor: "#fa541c",
             }}
           >
-            Go Back to Home
+            Browse Pizzas
           </Button>
         </div>
       ) : (
-        <Row gutter={[16, 16]} justify="center">
+        <Row gutter={[24, 24]} justify="center">
           <Col xs={24} md={16}>
             {cart.map((pizza, index) => (
               <Card
                 key={index}
+                hoverable
                 style={{
-                  marginBottom: "1rem",
-                  borderRadius: "10px",
-                  boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                  marginBottom: "1.5rem",
+                  borderRadius: "12px",
+                  border: "1px solid #f0f0f0",
+                  background: "#fff",
                 }}
               >
-                <Row align="middle">
+                <Row align="middle" justify="space-between">
                   <Col span={12}>
-                    <Title level={4}>Pizza {index + 1}</Title>
-                    <Text>Ingredients: {pizza.ingredients.join(", ")}</Text>
+                    <Title level={4} style={{ color: "#fa8c16" }}>
+                      Pizza {index + 1}
+                    </Title>
+                    <Text type="secondary">
+                      Ingredients: {pizza.ingredients.join(", ")}
+                    </Text>
                   </Col>
                   <Col span={6} style={{ textAlign: "center" }}>
                     <InputNumber
@@ -198,7 +179,7 @@ const CartPage = () => {
                     <Text style={{ marginLeft: "8px" }}>Qty</Text>
                   </Col>
                   <Col span={6} style={{ textAlign: "right" }}>
-                    <Text style={{ fontSize: "1.2rem", fontWeight: "bold" }}>
+                    <Text strong style={{ fontSize: "1.1rem", color: "#389e0d" }}>
                       ${(pizza.quantity * pizza.ingredients.length * 2.5).toFixed(2)}
                     </Text>
                   </Col>
@@ -206,35 +187,40 @@ const CartPage = () => {
               </Card>
             ))}
           </Col>
+
           <Col xs={24} md={8}>
             <Card
+              bordered={false}
               style={{
-                borderRadius: "10px",
-                boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                borderRadius: "12px",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+                background: "#fff",
               }}
             >
               <Title level={4}>Order Summary</Title>
               <Divider />
-              <Row justify="space-between">
+              <Row justify="space-between" style={{ marginBottom: "0.5rem" }}>
                 <Text>Total Pizzas:</Text>
-                <Text>{cart.reduce((total, pizza) => total + pizza.quantity, 0)}</Text>
+                <Text>{cart.reduce((acc, item) => acc + item.quantity, 0)}</Text>
               </Row>
-              <Row justify="space-between">
+              <Row justify="space-between" style={{ marginBottom: "1rem" }}>
                 <Text>Total Price:</Text>
-                <Text style={{ fontWeight: "bold" }}>${calculateTotal().toFixed(2)}</Text>
+                <Text style={{ fontWeight: "bold", fontSize: "1.1rem" }}>
+                  ${calculateTotal().toFixed(2)}
+                </Text>
               </Row>
-              <Divider />
               <Button
                 type="primary"
                 size="large"
+                block
                 onClick={handleCheckout}
                 style={{
-                  width: "100%",
                   backgroundColor: "#fa541c",
                   borderColor: "#fa541c",
+                  borderRadius: "8px",
                 }}
               >
-                Checkout
+                Proceed to Checkout
               </Button>
             </Card>
           </Col>
